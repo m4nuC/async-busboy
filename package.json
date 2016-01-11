@@ -4,11 +4,15 @@
   "description": "Async multipart parser",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "NODE_ENV=test mocha specs.js --harmony --reporter spec --bail"
   },
   "author": "0mbre <emmanuel.chappat@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "busboy": "^0.2.12"
+  },
+  "devDependencies": {
+    "formstream": "^1.0.0",
+    "mocha": "^2.3.4"
   }
 }

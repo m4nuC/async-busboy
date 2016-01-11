@@ -1,8 +1,9 @@
-import Busboy from 'busboy';
 //import Channel from 'async-csp';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
+'use strict';
+const Busboy = require('busboy');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 
 module.exports = function (request, options) {
   options = options || {}
@@ -100,7 +101,7 @@ function onFile(files, fieldname, file, filename, encoding, mimetype) {
  * @param  {[type]} string [description]
  * @return {[type]}        [description]
  */
- export const extractFormDataInputHierachy = (string) => {
+const extractFormDataInputHierachy = (string) => {
   let arr = string.split('[');
   let first = arr.shift();
   let res = arr.map( v => v.split(']')[0] );
@@ -115,7 +116,7 @@ function onFile(files, fieldname, file, filename, encoding, mimetype) {
  * @param  {[type]} value [description]
  * @return {[type]}       [description]
  */
- export const objectFromHierarchyArray = (arr, value) => {
+const objectFromHierarchyArray = (arr, value) => {
   value = value === EMPTY_ARRAY ? [] : value;
   return arr
     .reverse()
@@ -125,7 +126,7 @@ function onFile(files, fieldname, file, filename, encoding, mimetype) {
 }
 
 
-export const reconcile = (obj, target) => {
+const reconcile = (obj, target) => {
   var key = Object.keys(obj)[0];
   if ( target.hasOwnProperty(key)) {
     return reconcile(obj[key], target[key])
