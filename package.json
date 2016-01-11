@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "Promised based multipart form parser",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/m4nuC/async-busboy"
+  },
   "scripts": {
     "test": "NODE_ENV=test mocha specs.js --harmony --reporter spec --bail",
     "cover": "NODE_ENV=test istanbul cover -x specs.js _mocha specs.js -- --reporter spec --bail"
