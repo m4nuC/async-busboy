@@ -52,6 +52,54 @@ function(someHTTPRequest) {
 }
 ```
 
+### Working with nested inputs and objects
+Make sure to serialize object before sending them with formData. i.e:
+
+```js
+// Given of form input of name: i_am_an_input
+{
+  'key': 'value',
+  'nested': {
+    'anotherKey': 'anotherValue'
+  }
+};
+
+// -> i_am_an_input[key]
+// -> i_am_an_input[nested][anotherKey]
+// .....
+```
+
+Here is a funciton that can be used for this purpose
+```js
+const formatObjectForFormData = function (obj, formDataObj, namespace) {
+  var formDataObj = formDataObj || {};
+  var formKey;
+  for(var property in obj) {
+    if(obj.hasOwnProperty(property)) {
+      if(namespace) {
+        formKey = namespace + '[' + property + ']';
+      } else {
+        formKey = property;
+      }
+
+      // This allow passing empty array value to the server
+      let value =  Array.isArray(obj[property]) && obj[property].length === 0 ? EMPTY_ARRAY : obj[property];
+
+      if(typeof value === 'object' && !(value instanceof File) && !(value instanceof Date)) {
+          formatObjectForFormData(value, formDataObj, formKey);
+      } else if(value instanceof Date) {
+        formDataObj[formKey] = value.toISOString();
+      } else {
+        formDataObj[formKey] = value;
+      }
+    }
+  }
+  return formDataObj;
+};
+
+// -->
+```
+
 ### Use cases:
 
 - Form sending only octet-stream (files)
