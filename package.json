@@ -4,7 +4,8 @@
   "description": "Async multipart parser",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test mocha specs.js --harmony --reporter spec --bail"
+    "test": "NODE_ENV=test mocha specs.js --harmony --reporter spec --bail",
+    "cover": "NODE_ENV=test istanbul cover -x specs.js _mocha specs.js -- --reporter spec --bail"
   },
   "author": "0mbre <emmanuel.chappat@gmail.com>",
   "license": "ISC",
@@ -13,6 +14,7 @@
   },
   "devDependencies": {
     "formstream": "^1.0.0",
+    "istanbul": "^0.4.1",
     "mocha": "^2.3.4"
   }
 }
