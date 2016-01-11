@@ -5,6 +5,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const EMPTY_ARRAY = 'EMPTY_ARRAY';
+const getDescriptor = Object.getOwnPropertyDescriptor;
 
 module.exports = function (request, options) {
   options = options || {}
@@ -77,6 +78,9 @@ module.exports = function (request, options) {
 }
 
 function onField(fields, name, val, fieldnameTruncated, valTruncated) {
+  // don't overwrite prototypes
+  if (getDescriptor(Object.prototype, name)) return
+
   if (name.indexOf('[') > -1) {
     const obj = objectFromHierarchyArray(extractFormDataInputHierachy(name), val);
     reconcile(obj, fields);

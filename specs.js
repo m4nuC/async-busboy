@@ -15,11 +15,19 @@ describe('Co Busboy', () => {
     }).catch(done);
   })
 
-  // it('should work with array fields', () => {
-  //   asyncBusboy(request()).then(formData => {
-  //     assert.equal(formData.fields.array_field, 3)
-  //   });
-  // })
+  it('should work with array fields', (done) => {
+    asyncBusboy(request()).then(formData => {
+      expect(formData.fields.array_field['1']).toBe('value2')
+      done();
+    }).catch(done);
+  })
+
+  it('should not overwrite prototypes', (done) => {
+    asyncBusboy(request()).then(formData => {
+      expect(formData.fields.hasOwnProperty).toEqual(Object.prototype.hasOwnProperty)
+      done();
+    }).catch(done);
+  })
 
   it('should throw error when the files limit is reached', (done) => {
     asyncBusboy(request(), {limits: {
@@ -48,9 +56,6 @@ describe('Co Busboy', () => {
         done()
       })
   })
-
-
-
 })
 
 function makeError(message) {
@@ -91,6 +96,14 @@ function request() {
     'Content-Disposition: form-data; name="hasOwnProperty"',
     '',
     'super bad file',
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="array_field[0]"',
+    '',
+    'value1',
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="array_field[1]"',
+    '',
+    'value2',
     '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
     'Content-Disposition: form-data; name="upload_file_0"; filename="1k_a.dat"',
     'Content-Type: application/octet-stream',
