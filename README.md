@@ -16,10 +16,43 @@
 [download-url]: https://npmjs.org/package/async-busboy
 
 
-Promised base wrapper around busboy. Can be used with async/await and koa2.
+Promised based multipart form parser. Parsing logic relies on [busboy](http://github.com/mscdex/busboy), mainly inspired by [co-busboy](http://github.com/cojs/busboy). Ideal for async/await and koa2.
+
+As of today there is no support for direct piping of the request stream. The files are first written to disk (using os.tmpDir()). Not when the consumer stream drained the request stream, file will be automatically removed.
 
 
-## Use cases:
+## Examples
+
+### Async/Await
+```js
+import asyncBusboy from 'async-busboy';
+
+// Koa 2 middleware
+async function(ctx, next) {
+  const {files, fields} = await multiparter(ctx.req);
+
+  // Make some validation on the fields before upload to S3
+  if ( checkFiles(fields) ) {
+    files.map(uploadFilesToS3)
+  } else {
+    return 'error';
+  }
+}
+```
+
+### ES5
+```js
+var asyncBusboy = require('async-busboy');
+
+function(someHTTPRequest) {
+  multiparter(someHTTPRequest).then(function(formData) {
+    // do something with formData.files
+    // do someting with formData.fields
+  });
+}
+```
+
+### Use cases:
 
 - Form sending only octet-stream (files)
 
