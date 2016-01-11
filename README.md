@@ -29,7 +29,7 @@ import asyncBusboy from 'async-busboy';
 
 // Koa 2 middleware
 async function(ctx, next) {
-  const {files, fields} = await multiparter(ctx.req);
+  const {files, fields} = await asyncBusboy(ctx.req);
 
   // Make some validation on the fields before upload to S3
   if ( checkFiles(fields) ) {

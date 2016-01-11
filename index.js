@@ -4,6 +4,7 @@ const Busboy = require('busboy');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const EMPTY_ARRAY = 'EMPTY_ARRAY';
 
 module.exports = function (request, options) {
   options = options || {}
@@ -31,7 +32,7 @@ module.exports = function (request, options) {
     })
 
     busboy.on('filesLimit', function(){
-      console.log('here');
+      console.log('file limit');
       const err = new Error('Reach files limit')
       err.code = 'Request_files_limit'
       err.status = 413
@@ -46,32 +47,33 @@ module.exports = function (request, options) {
     })
 
     busboy.on('finish', function(){
-      resolve({fields, files})
+      return resolve({fields, files})
     })
 
     request.pipe(busboy)
+
+
+    function onError(err) {
+      cleanup();
+      reject(err);
+    }
+
+    function onEnd(err) {
+      cleanup();
+    }
+
+    function cleanup() {
+      request.removeListener('close', cleanup)
+      busboy.removeListener('field', onField)
+      busboy.removeListener('file', onFile)
+      busboy.removeListener('close', cleanup)
+      busboy.removeListener('error', onEnd)
+      busboy.removeListener('partsLimit', onEnd)
+      busboy.removeListener('filesLimit', onEnd)
+      busboy.removeListener('fieldsLimit', onEnd)
+      busboy.removeListener('finish', onEnd)
+    }
   })
-
-  function onError(err) {
-    cleanup();
-    Promise.reject(err);
-  }
-
-  function onEnd(err) {
-    cleanup();
-  }
-
-  function cleanup() {
-    request.removeListener('close', cleanup)
-    busboy.removeListener('field', onField)
-    busboy.removeListener('file', onFile)
-    busboy.removeListener('close', cleanup)
-    busboy.removeListener('error', onEnd)
-    busboy.removeListener('partsLimit', onEnd)
-    busboy.removeListener('filesLimit', onEnd)
-    busboy.removeListener('fieldsLimit', onEnd)
-    busboy.removeListener('finish', onEnd)
-  }
 }
 
 function onField(fields, name, val, fieldnameTruncated, valTruncated) {
@@ -102,7 +104,7 @@ function onFile(files, fieldname, file, filename, encoding, mimetype) {
  * @param  {[type]} string [description]
  * @return {[type]}        [description]
  */
-const extractFormDataInputHierachy = (string) => {
+const extractFormDataInputHierachy = module.exports.extractFormDataInputHierachy = (string) => {
   let arr = string.split('[');
   let first = arr.shift();
   let res = arr.map( v => v.split(']')[0] );

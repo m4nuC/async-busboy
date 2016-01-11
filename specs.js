@@ -1,39 +1,61 @@
 'use strict';
 const Stream = require('stream')
-const assert = require('assert')
+const expect = require('expect')
 const path = require('path')
 const fs = require('fs')
 const formstream = require('formstream')
 const asyncBusboy = require('./')
 
 describe('Co Busboy', () => {
-  it('should gather all fields and streams', () => {
+  it('should gather all fields and streams', (done) => {
     asyncBusboy(request()).then(formData => {
-      assert.equal(formData.fields, 6)
-      assert.equal(formData.files, 3)
-    });
+      expect(Object.keys(formData.files).length).toBe(3);
+      expect(Object.keys(formData.fields).length).toBe(4)
+      done();
+    }).catch(done);
   })
 
-  it('should throw error when the files limit is reached', () => {
+  // it('should work with array fields', () => {
+  //   asyncBusboy(request()).then(formData => {
+  //     assert.equal(formData.fields.array_field, 3)
+  //   });
+  // })
+
+  it('should throw error when the files limit is reached', (done) => {
     asyncBusboy(request(), {limits: {
       files: 1
-    }}).catch( e => {
-      assert.equal(e.status, 413)
-      assert.equal(e.code, 'Request_files_limit')
-      assert.equal(e.message, 'Reach files limit')
-    })
+    }}).then(() => {
+        done(makeError('Request_files_limit was not thrown'))
+      },
+      e => {
+        expect(e.status).toBe(413);
+        expect(e.code).toBe('Request_files_limit');
+        expect(e.message).toBe('Reach files limit');
+        done()
+      })
   })
 
-  it('should throw error when the fields limit is reached', () => {
+  it('should throw error when the fields limit is reached', (done) => {
     asyncBusboy(request(), {limits: {
       fields: 1
-    }}).catch( e => {
-      assert.equal(e.status, 413)
-      assert.equal(e.code, 'Request_fields_limit')
-      assert.equal(e.message, 'Reach fields limit')
-    })
+    }}).then(() => {
+        done(makeError('Request_fields_limit was not thrown'))
+      },
+      e => {
+        expect(e.status).toBe(413);
+        expect(e.code).toBe('Request_fields_limit');
+        expect(e.message).toBe('Reach fields limit');
+        done()
+      })
   })
+
+
+
 })
+
+function makeError(message) {
+  return new Error(message);
+}
 
 function request() {
   // https://github.com/mscdex/busboy/blob/master/test/test-types-multipart.js

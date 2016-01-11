@@ -17,6 +17,7 @@
     "busboy": "^0.2.12"
   },
   "devDependencies": {
+    "expect": "^1.13.4",
     "formstream": "*",
     "istanbul": "*",
     "mocha": "*"
