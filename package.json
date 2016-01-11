@@ -1,20 +1,20 @@
 {
   "name": "async-busboy",
   "version": "0.0.1",
-  "description": "Async multipart parser",
+  "description": "Promised based multipart form parser",
   "main": "index.js",
   "scripts": {
     "test": "NODE_ENV=test mocha specs.js --harmony --reporter spec --bail",
     "cover": "NODE_ENV=test istanbul cover -x specs.js _mocha specs.js -- --reporter spec --bail"
   },
-  "author": "0mbre <emmanuel.chappat@gmail.com>",
-  "license": "ISC",
+  "author": "Emanuel Chappat <emmanuel.chappat@gmail.com>",
+  "license": "MIT",
   "dependencies": {
     "busboy": "^0.2.12"
   },
   "devDependencies": {
-    "formstream": "^1.0.0",
-    "istanbul": "^0.4.1",
-    "mocha": "^2.3.4"
+    "formstream": "*",
+    "istanbul": "*",
+    "mocha": "*"
   }
 }
