@@ -1,25 +1,39 @@
-var Stream = require('stream')
-var assert = require('assert')
-var path = require('path')
-var fs = require('fs')
-var formstream = require('formstream')
+'use strict';
+const Stream = require('stream')
+const assert = require('assert')
+const path = require('path')
+const fs = require('fs')
+const formstream = require('formstream')
+const asyncBusboy = require('./')
 
-var asyncBusboy = require('./')
-
-describe('Co Busboy', function () {
-  it('should gather all fields and streams', function () {
+describe('Co Busboy', () => {
+  it('should gather all fields and streams', () => {
     asyncBusboy(request()).then(formData => {
       assert.equal(formData.fields, 6)
       assert.equal(formData.files, 3)
     });
   })
-})
 
-function wait(ms) {
-  return function (done) {
-    setTimeout(done, ms)
-  }
-}
+  it('should throw error when the files limit is reached', () => {
+    asyncBusboy(request(), {limits: {
+      files: 1
+    }}).catch( e => {
+      assert.equal(e.status, 413)
+      assert.equal(e.code, 'Request_files_limit')
+      assert.equal(e.message, 'Reach files limit')
+    })
+  })
+
+  it('should throw error when the fields limit is reached', () => {
+    asyncBusboy(request(), {limits: {
+      fields: 1
+    }}).catch( e => {
+      assert.equal(e.status, 413)
+      assert.equal(e.code, 'Request_fields_limit')
+      assert.equal(e.message, 'Reach fields limit')
+    })
+  })
+})
 
 function request() {
   // https://github.com/mscdex/busboy/blob/master/test/test-types-multipart.js

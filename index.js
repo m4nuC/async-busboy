@@ -31,6 +31,7 @@ module.exports = function (request, options) {
     })
 
     busboy.on('filesLimit', function(){
+      console.log('here');
       const err = new Error('Reach files limit')
       err.code = 'Request_files_limit'
       err.status = 413
