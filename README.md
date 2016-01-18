@@ -18,7 +18,7 @@
 
 Promised based multipart form parser. Parsing logic relies on [busboy](http://github.com/mscdex/busboy), mainly inspired by [co-busboy](http://github.com/cojs/busboy). Ideal for async/await and koa2.
 
-As of today there is no support for direct piping of the request stream. The files are first written to disk (using os.tmpDir()). Not when the consumer stream drained the request stream, file will be automatically removed.
+Althought this feature is planned for the near future, as of today there is no support for directly piping of the request stream into a consumer. This is because the typical use case for which async-busboy has been created is forms mixing fields and files where fields must be processed (i.e. validated) before saving the file. The files are first written to disk using `os.tmpDir()`. When the consumer stream drained the request stream, file will be automatically removed otherwise the host OS should take care of the cleaning process.
 
 
 ## Examples
@@ -56,20 +56,24 @@ function(someHTTPRequest) {
 Make sure to serialize object before sending them with formData. i.e:
 
 ```js
-// Given of form input of name: i_am_an_input
+// Given an object that represent the form data:
 {
-  'key': 'value',
-  'nested': {
-    'anotherKey': 'anotherValue'
+  'field1': 'value',
+  'objectField': {
+    'key': 'anotherValue'
   }
+  //...
 };
+```
 
-// -> i_am_an_input[key]
-// -> i_am_an_input[nested][anotherKey]
+should be sent as:
+```
+// -> field1[value]
+// -> objectField[key][anotherKey]
 // .....
 ```
 
-Here is a funciton that can be used for this purpose
+Here is a function that can take care of formating such an object to formData readable hierarchy
 ```js
 const formatObjectForFormData = function (obj, formDataObj, namespace) {
   var formDataObj = formDataObj || {};
@@ -81,9 +85,6 @@ const formatObjectForFormData = function (obj, formDataObj, namespace) {
       } else {
         formKey = property;
       }
-
-      // This allow passing empty array value to the server
-      let value =  Array.isArray(obj[property]) && obj[property].length === 0 ? EMPTY_ARRAY : obj[property];
 
       if(typeof value === 'object' && !(value instanceof File) && !(value instanceof Date)) {
           formatObjectForFormData(value, formDataObj, formKey);

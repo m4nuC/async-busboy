@@ -6,7 +6,7 @@ const fs = require('fs')
 const formstream = require('formstream')
 const asyncBusboy = require('./')
 
-describe('Co Busboy', () => {
+describe('Async-busboy', () => {
   it('should gather all fields and streams', (done) => {
     asyncBusboy(request()).then(formData => {
       expect(Object.keys(formData.files).length).toBe(3);

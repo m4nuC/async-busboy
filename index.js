@@ -108,7 +108,7 @@ function onFile(files, fieldname, file, filename, encoding, mimetype) {
  * @param  {[type]} string [description]
  * @return {[type]}        [description]
  */
-const extractFormDataInputHierachy = module.exports.extractFormDataInputHierachy = (string) => {
+const extractFormDataInputHierachy = (string) => {
   let arr = string.split('[');
   let first = arr.shift();
   let res = arr.map( v => v.split(']')[0] );

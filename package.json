@@ -1,6 +1,6 @@
 {
   "name": "async-busboy",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Promised based multipart form parser",
   "main": "index.js",
   "repository": {
@@ -11,6 +11,12 @@
     "test": "NODE_ENV=test mocha specs.js --harmony --reporter spec --bail",
     "cover": "NODE_ENV=test istanbul cover -x specs.js _mocha specs.js -- --reporter spec --bail"
   },
+  "keywords": [
+    "koa",
+    "multipart",
+    "form",
+    "file-upload"
+  ],
   "author": "Emanuel Chappat <emmanuel.chappat@gmail.com>",
   "license": "MIT",
   "dependencies": {
