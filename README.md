@@ -1,4 +1,4 @@
-# Promised based multipart form parser
+# Promise Based Multipart Form Parser
 
 
 [![NPM version][npm-image]][npm-url]
@@ -16,7 +16,7 @@
 [download-url]: https://npmjs.org/package/async-busboy
 
 
-Promised based multipart form parser. Parsing logic relies on [busboy](http://github.com/mscdex/busboy), mainly inspired by [co-busboy](http://github.com/cojs/busboy). Ideal for async/await and koa2.
+Parsing logic relies on [busboy](http://github.com/mscdex/busboy), mainly inspired by [co-busboy](http://github.com/cojs/busboy). Designed for use with [Koa2](https://github.com/koajs/koa/tree/v2.x) and [Async/Await](https://github.com/tc39/ecmascript-asyncawait).
 
 Althought this feature is planned for the near future, as of today there is no support for directly piping of the request stream into a consumer. This is because the typical use case for which async-busboy has been created is forms mixing fields and files where fields must be processed (i.e. validated) before saving the file. The files are first written to disk using `os.tmpDir()`. When the consumer stream drained the request stream, file will be automatically removed otherwise the host OS should take care of the cleaning process.
 
@@ -45,12 +45,16 @@ async function(ctx, next) {
 var asyncBusboy = require('async-busboy');
 
 function(someHTTPRequest) {
-  multiparter(someHTTPRequest).then(function(formData) {
+  asyncBusboy(someHTTPRequest).then(function(formData) {
     // do something with formData.files
     // do someting with formData.fields
   });
 }
 ```
+
+If you want to run some test localy, close this repo, the run: `node examples/index.js`
+From there you can use something like [Postman](https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?hl=en) to send `POST` request to `localhost:8080`.
+Note: When using Postman make sure to not send a `Content-Type` header, if it's field by default, juste delete it.
 
 ### Working with nested inputs and objects
 Make sure to serialize object before sending them with formData. i.e:
