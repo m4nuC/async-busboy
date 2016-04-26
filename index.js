@@ -90,12 +90,12 @@ function onFile(files, fieldname, file, filename, encoding, mimetype) {
   const tmpName = file.tmpName = new Date().getTime()  + fieldname  + filename;
   const saveTo = path.join(os.tmpDir(), path.basename(tmpName));
   const writeStream = file.pipe(fs.createWriteStream(saveTo));
-  const readStream = fs.createReadStream(saveTo);
-  readStream.fieldname = fieldname
-  readStream.filename = filename
-  readStream.transferEncoding = readStream.encoding = encoding
-  readStream.mimeType = readStream.mime = mimetype;
-  readStream.on('open', function() {
+  writeStream.on('open', function() {
+    const readStream = fs.createReadStream(saveTo);
+    readStream.fieldname = fieldname
+    readStream.filename = filename
+    readStream.transferEncoding = readStream.encoding = encoding
+    readStream.mimeType = readStream.mime = mimetype;
     files.push(readStream);
   })
 }

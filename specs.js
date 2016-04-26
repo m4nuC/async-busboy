@@ -1,17 +1,22 @@
 'use strict';
-const Stream = require('stream')
-const expect = require('expect')
-const path = require('path')
-const fs = require('fs')
-const formstream = require('formstream')
-const asyncBusboy = require('./')
+const Stream = require('stream');
+const expect = require('expect');
+const path = require('path');
+const fs = require('fs');
+const formstream = require('formstream');
+const asyncBusboy = require('./');
 
 describe('Async-busboy', () => {
   it('should gather all fields and streams', (done) => {
     asyncBusboy(request()).then(formData => {
-      expect(Object.keys(formData.files).length).toBe(3);
-      expect(Object.keys(formData.fields).length).toBe(4)
-      done();
+      // Timeout is there to make sure that file array will be available
+      // since v0.0.5 the file are only added to the file array when the
+      // write stream 'open' event is fired
+      setTimeout(function() {
+        expect(Object.keys(formData.files).length).toBe(3);
+        expect(Object.keys(formData.fields).length).toBe(4)
+        done();
+      }, 5)
     }).catch(done);
   })
 
@@ -71,7 +76,7 @@ function request() {
     'content-type': 'multipart/form-data; boundary=---------------------------paZqsnEHRufoShdX6fh0lUhXBP4k'
   }
 
-  stream.end([
+  stream.write([
     '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
     'Content-Disposition: form-data; name="file_name_0"',
     '',
