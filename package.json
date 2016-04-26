@@ -1,7 +1,7 @@
 {
   "name": "async-busboy",
-  "version": "0.0.4",
-  "description": "Promised based multipart form parser",
+  "version": "0.0.5",
+  "description": "Promise based multipart form parser",
   "main": "index.js",
   "repository": {
     "type": "git",
