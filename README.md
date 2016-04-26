@@ -52,7 +52,7 @@ function(someHTTPRequest) {
 }
 ```
 
-If you want to run some test localy, close this repo, the run: `node examples/index.js`
+If you want to run some test localy, clone this repo, the run: `node examples/index.js`
 From there you can use something like [Postman](https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?hl=en) to send `POST` request to `localhost:8080`.
 Note: When using Postman make sure to not send a `Content-Type` header, if it's field by default, juste delete it.
 
