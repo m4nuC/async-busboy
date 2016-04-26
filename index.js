@@ -81,6 +81,7 @@ function onField(fields, name, val, fieldnameTruncated, valTruncated) {
   // don't overwrite prototypes
   if (getDescriptor(Object.prototype, name)) return
 
+  // If this looks like a stringified array parse it
   if (name.indexOf('[') > -1) {
     const obj = objectFromHierarchyArray(extractFormDataInputHierachy(name), val);
     reconcile(obj, fields);
