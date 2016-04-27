@@ -15,11 +15,8 @@
 [download-image]: https://img.shields.io/npm/dm/async-busboy.svg?style=flat-square
 [download-url]: https://npmjs.org/package/async-busboy
 
-
+The typical use case for this library is when handling forms that contain file upload field(s).
 Parsing logic relies on [busboy](http://github.com/mscdex/busboy), mainly inspired by [co-busboy](http://github.com/cojs/busboy). Designed for use with [Koa2](https://github.com/koajs/koa/tree/v2.x) and [Async/Await](https://github.com/tc39/ecmascript-asyncawait).
-
-Althought this feature is planned for the near future, as of today there is no support for directly piping of the request stream into a consumer. This is because the typical use case for which async-busboy has been created is forms mixing fields and files where fields must be processed (i.e. validated) before saving the file. The files are first written to disk using `os.tmpDir()`. When the consumer stream drained the request stream, file will be automatically removed otherwise the host OS should take care of the cleaning process.
-
 
 ## Examples
 
@@ -40,7 +37,7 @@ async function(ctx, next) {
 }
 ```
 
-### ES5
+### ES5 with promise
 ```js
 var asyncBusboy = require('async-busboy');
 
@@ -51,7 +48,9 @@ function(someHTTPRequest) {
   });
 }
 ```
+As of today there is no support for directly piping of the request stream into a consumer. The files are first written to disk using `os.tmpDir()`. When the consumer stream drained the request stream, file will be automatically removed, otherwise the host OS should take care of the cleaning process.
 
+### Try it on your local
 If you want to run some test localy, clone this repo, the run: `node examples/index.js`
 From there you can use something like [Postman](https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?hl=en) to send `POST` request to `localhost:8080`.
 Note: When using Postman make sure to not send a `Content-Type` header, if it's field by default, juste delete it.
