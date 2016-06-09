@@ -1,4 +1,3 @@
-//import Channel from 'async-csp';
 'use strict';
 const Busboy = require('busboy');
 const fs = require('fs');
@@ -80,7 +79,10 @@ function onField(fields, name, val, fieldnameTruncated, valTruncated) {
   // This looks like a stringified array, let's parse it
   if (name.indexOf('[') > -1) {
     const obj = objectFromHierarchyArray(extractFormDataInputHierachy(name), val);
+    console.log(obj)
     reconcile(obj, fields);
+    console.log(obj)
+
   } else {
     fields[name] = val;
   }
@@ -102,10 +104,15 @@ function onFile(files, fieldname, file, filename, encoding, mimetype) {
 
 
 /**
- * Extrat hierarchy from nested formData inputs
+ *
+ * Extract a hierarchy array from a stringified formData single input.
+ *
+ *
  * i.e. topLevel[sub1][sub2] => [topLevel, sub1, sub2]
- * @param  {[type]} string [description]
- * @return {[type]}        [description]
+ *
+ * @param  {String} string: Stringify representation of a formData Object
+ * @return {Array}
+ *
  */
 const extractFormDataInputHierachy = (string) => {
   let arr = string.split('[');
@@ -116,11 +123,15 @@ const extractFormDataInputHierachy = (string) => {
 }
 
 /**
- * Create an object given an array bluepint
+ *
+ * Generate an object given an hiearchy bluepint and the value
+ *
  * i.e. [key1][key2][key3] => { key1: {key2: { key3: value }}};
- * @param  {[type]} arr   [description]
- * @param  {[type]} value [description]
+ *
+ * @param  {Array} arr:   from extractFormDataInputHierachy
+ * @param  {[type]} value: The actual value for this key
  * @return {[type]}       [description]
+ *
  */
 const objectFromHierarchyArray = (arr, value) => {
   value = value === EMPTY_ARRAY ? [] : value;

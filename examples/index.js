@@ -9,7 +9,10 @@ const PORT=8080;
 function handleRequest(request, response){
   multiparter(request).then(function(formData) {
     // [You can put your tests here]
-    // console.log(formData.files)
+    // console.log('Files :', formData.files);
+    // console.log('Fields :', formData.fields)
+
+    // We need to emit a reponse so that the request doesn't hang
     response.end('It Works!! ');
   },function(error) {
     console.log(error)
