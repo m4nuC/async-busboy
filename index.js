@@ -21,7 +21,7 @@ module.exports = function (request, options) {
       .on('field', onField.bind(null, fields))
       .on('file', onFile.bind(null, files))
       .on('close', cleanup)
-      .on('error', onEnd)
+      .on('error', onError)
       .on('end', onEnd)
       .on('finish', onEnd),
 
