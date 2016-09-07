@@ -1,4 +1,5 @@
 'use strict';
+
 const Busboy = require('busboy');
 const fs = require('fs');
 const os = require('os');
@@ -79,9 +80,7 @@ function onField(fields, name, val, fieldnameTruncated, valTruncated) {
   // This looks like a stringified array, let's parse it
   if (name.indexOf('[') > -1) {
     const obj = objectFromHierarchyArray(extractFormDataInputHierachy(name), val);
-    console.log(obj)
     reconcile(obj, fields);
-    console.log(obj)
 
   } else {
     fields[name] = val;
@@ -101,7 +100,6 @@ function onFile(files, fieldname, file, filename, encoding, mimetype) {
   });
   file.pipe(fs.createWriteStream(saveTo));
 }
-
 
 /**
  *
@@ -137,15 +135,24 @@ const objectFromHierarchyArray = (arr, value) => {
   value = value === EMPTY_ARRAY ? [] : value;
   return arr
     .reverse()
-    .reduce((acc, next) => {
-      return {[next]: acc}
-    }, value)
+    .reduce((acc, next) => (
+      Number(next).toString() === 'NaN' ? {[next]: acc} : [acc]),
+      value
+    )
 }
-
 
 const reconcile = (obj, target) => {
   var key = Object.keys(obj)[0];
-  if ( target.hasOwnProperty(key)) {
+
+  if (Array.isArray(obj[key])) {
+    Array.isArray(target[key])
+      ? target[key].push(obj[key][0])
+      : target[key] = obj[key];
+
+    return target;
+  }
+
+  if (target.hasOwnProperty(key)) {
     return reconcile(obj[key], target[key])
   } else {
     return target[key] = obj[key];
