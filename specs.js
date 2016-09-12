@@ -20,14 +20,23 @@ describe('Async-busboy', () => {
       expect(formData.fields.array_field['1']).toBe('value2')
       done();
     }).catch(done);
-  })
+  });
+
+  it('should return an array for array_field', (done) => {
+    asyncBusboy(request())
+      .then(formData => {
+        expect(Array.isArray(formData.fields['array_field'])).toBe(true);
+        done();
+      })
+      .catch(done);
+  });
 
   it('should not overwrite prototypes', (done) => {
-    asyncBusboy(request()).then(formData => {
+    asyncBusboy(request()).then(formData => {;
       expect(formData.fields.hasOwnProperty).toEqual(Object.prototype.hasOwnProperty)
       done();
     }).catch(done);
-  })
+  });
 
   it('should throw error when the files limit is reached', (done) => {
     asyncBusboy(request(), {limits: {
@@ -40,8 +49,8 @@ describe('Async-busboy', () => {
         expect(e.code).toBe('Request_files_limit');
         expect(e.message).toBe('Reach files limit');
         done()
-      })
-  })
+      });
+  });
 
   it('should throw error when the fields limit is reached', (done) => {
     asyncBusboy(request(), {limits: {
@@ -54,9 +63,9 @@ describe('Async-busboy', () => {
         expect(e.code).toBe('Request_fields_limit');
         expect(e.message).toBe('Reach fields limit');
         done()
-      })
-  })
-})
+      });
+  });
+});
 
 function makeError(message) {
   return new Error(message);

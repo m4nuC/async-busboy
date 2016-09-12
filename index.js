@@ -136,7 +136,9 @@ const objectFromHierarchyArray = (arr, value) => {
   return arr
     .reverse()
     .reduce((acc, next) => (
-      Number(next).toString() === 'NaN' ? {[next]: acc} : [acc]),
+      Number(next).toString() === 'NaN'
+        ? {[next]: acc}
+        : [acc, Number(next)]),
       value
     )
 }
@@ -145,9 +147,16 @@ const reconcile = (obj, target) => {
   var key = Object.keys(obj)[0];
 
   if (Array.isArray(obj[key])) {
-    Array.isArray(target[key])
-      ? target[key].push(obj[key][0])
-      : target[key] = obj[key];
+    let val = obj[key][0], idx = obj[key][1];
+    if (Array.isArray(target[key])) {
+      let k = Object.keys(val)[0];
+
+      target[key][idx] == null
+        ? target[key].push(val)
+        : target[key][idx][k] = val[k];
+    } else {
+      target[key] = [val];
+    }
 
     return target;
   }
