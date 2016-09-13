@@ -10,7 +10,7 @@ describe('Async-busboy', () => {
   it('should gather all fields and streams', (done) => {
     asyncBusboy(request()).then(formData => {
       expect(Object.keys(formData.files).length).toBe(3);
-      expect(Object.keys(formData.fields).length).toBe(4)
+      expect(Object.keys(formData.fields).length).toBe(6)
       done();
     }).catch(done);
   })
@@ -31,8 +31,19 @@ describe('Async-busboy', () => {
       .catch(done);
   });
 
+  it('should return a valid collection', (done) => {
+    asyncBusboy(request())
+      .then(formData => {
+        var someCollection = formData.fields.someCollection;
+        expect(Array.isArray(someCollection)).toBe(true);
+        expect(someCollection[0]).toEqual({foo: 'foo', bar: 'bar'});
+        done();
+      })
+      .catch(done)
+  });
+
   it('should not overwrite prototypes', (done) => {
-    asyncBusboy(request()).then(formData => {;
+    asyncBusboy(request()).then(formData => {
       expect(formData.fields.hasOwnProperty).toEqual(Object.prototype.hasOwnProperty)
       done();
     }).catch(done);
@@ -113,6 +124,25 @@ function request() {
     'Content-Disposition: form-data; name="array_field[1]"',
     '',
     'value2',
+
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="someCollection[0][foo]"',
+    '',
+    'foo',
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="someCollection[0][bar]"',
+    '',
+    'bar',
+
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="someField[foo]"',
+    '',
+    'foo',
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="someField[bar]"',
+    '',
+    'bar',
+
     '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
     'Content-Disposition: form-data; name="upload_file_0"; filename="1k_a.dat"',
     'Content-Type: application/octet-stream',
