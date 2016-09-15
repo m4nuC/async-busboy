@@ -16,7 +16,8 @@
 [download-url]: https://npmjs.org/package/async-busboy
 
 The typical use case for this library is when handling forms that contain file upload field(s) mixed with other inputs.
-Parsing logic relies on [busboy](http://github.com/mscdex/busboy), mainly inspired by [co-busboy](http://github.com/cojs/busboy). Designed for use with [Koa2](https://github.com/koajs/koa/tree/v2.x) and [Async/Await](https://github.com/tc39/ecmascript-asyncawait).
+Parsing logic relies on [busboy](http://github.com/mscdex/busboy).
+Designed for use with [Koa2](https://github.com/koajs/koa/tree/v2.x) and [Async/Await](https://github.com/tc39/ecmascript-asyncawait).
 
 ## Examples
 
@@ -50,12 +51,7 @@ function(someHTTPRequest) {
 ```
 As of today there is no support for directly piping of the request stream into a consumer. The files are first written to disk using `os.tmpDir()`. When the consumer stream drained the request stream, files will be automatically removed, otherwise the host OS should take care of the cleaning process.
 
-### Try it on your local
-If you want to run some test localy, clone this repo, then run: `node examples/index.js`
-From there you can use something like [Postman](https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?hl=en) to send `POST` request to `localhost:8080`.
-Note: When using Postman make sure to not send a `Content-Type` header, if it's filed by default, just delete it. (This is to let the `boudary` header be generated automaticaly)
-
-### Working with nested inputs and objects
+## Working with nested inputs and objects
 Make sure to serialize objects before sending them as formData.
 i.e:
 ```js
@@ -106,6 +102,13 @@ const serializeFormData = (obj, formDataObj, namespace = null) => {
 
 // -->
 ```
+
+
+### Try it on your local
+If you want to run some test localy, clone this repo, then run: `node examples/index.js`
+From there you can use something like [Postman](https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?hl=en) to send `POST` request to `localhost:8080`.
+Note: When using Postman make sure to not send a `Content-Type` header, if it's filed by default, just delete it. (This is to let the `boudary` header be generated automaticaly)
+
 
 ### Use cases:
 
