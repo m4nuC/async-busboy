@@ -4,7 +4,7 @@ const Busboy = require('busboy');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const EMPTY_ARRAY = 'EMPTY_ARRAY';
+
 const getDescriptor = Object.getOwnPropertyDescriptor;
 
 module.exports = function (request, options) {
@@ -132,7 +132,6 @@ const extractFormDataInputHierachy = (string) => {
  *
  */
 const objectFromHierarchyArray = (arr, value) => {
-  value = value === EMPTY_ARRAY ? [] : value;
   return arr
     .reverse()
     .reduce((acc, next) => (
