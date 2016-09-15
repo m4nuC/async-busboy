@@ -148,6 +148,7 @@ const objectFromBluePrint = (arr, value) => {
 
 
 /**
+ * [Deprecated] because of https://jsbin.com/hulekomopo/1/
  * Merges two array when one of them may me unconplete
  *
  * i.e.:
@@ -195,13 +196,16 @@ const reconcile = (obj, target) => {
   const key = Object.keys(obj)[0];
   const val = obj[key];
 
-  // Dealing with objects
+  // This work for array and object without using mergeArray
+  // because event if array value is empty Object.keys will yield the index
+  // see https://jsbin.com/hulekomopo/1/
   if (target.hasOwnProperty(key)) {
     return reconcile(val, target[key])
   } else {
     return target[key] = val;
   }
 
+  // [Deprecated] because of https://jsbin.com/hulekomopo/1/
   // Dealing with array values
   // if (Array.isArray(val)) {
   //   if (Array.isArray(target[key])) {
