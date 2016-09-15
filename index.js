@@ -196,9 +196,11 @@ const reconcile = (obj, target) => {
   const key = Object.keys(obj)[0];
   const val = obj[key];
 
-  // This work for array and object without using mergeArray
-  // because event if array value is empty Object.keys will yield the index
+  // The reconciliation works even with array has
+  // Object.keys will yield the array indexes
   // see https://jsbin.com/hulekomopo/1/
+  // Since array are in form of [ , , valu3] [value1, value2]
+  // the final array will be: [value1, value2, value3] has expected
   if (target.hasOwnProperty(key)) {
     return reconcile(val, target[key])
   } else {
