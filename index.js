@@ -184,16 +184,23 @@ const mergeArray = (arr1, arr2) => {
 
 
 /**
- * Reconciles formated data with initial fields names
+ * Reconciles formatted data with already formatted data
  *
  * @param  {Object} extractedObject
- * @param  {Object} the field object initially received
+ * @param  {Object} the field object
  * @return {Object} reconciled fields
  *
  */
 const reconcile = (obj, target) => {
   const key = Object.keys(obj)[0];
   const val = obj[key];
+
+  // Dealing with objects
+  if (target.hasOwnProperty(key)) {
+    return reconcile(val, target[key])
+  } else {
+    return target[key] = val;
+  }
 
   // Dealing with array values
   if (Array.isArray(val)) {
@@ -203,11 +210,7 @@ const reconcile = (obj, target) => {
       target[key] = val;
     }
     return target;
-
-  // Dealing with objects
-  } else if (target.hasOwnProperty(key)) {
-    return reconcile(val, target[key])
-  } else {
-    return target[key] = val;
   }
+
+
 }
