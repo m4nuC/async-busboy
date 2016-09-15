@@ -10,7 +10,7 @@ describe('Async-busboy', () => {
   it('should gather all fields and streams', (done) => {
     asyncBusboy(request()).then(formData => {
       expect(Object.keys(formData.files).length).toBe(3);
-      expect(Object.keys(formData.fields).length).toBe(4)
+      expect(Object.keys(formData.fields).length).toBe(6)
       done();
     }).catch(done);
   })
@@ -20,14 +20,34 @@ describe('Async-busboy', () => {
       expect(formData.fields.array_field['1']).toBe('value2')
       done();
     }).catch(done);
-  })
+  });
+
+  it('should return an array for array_field', (done) => {
+    asyncBusboy(request())
+      .then(formData => {
+        expect(Array.isArray(formData.fields['array_field'])).toBe(true);
+        done();
+      })
+      .catch(done);
+  });
+
+  it('should return a valid collection', (done) => {
+    asyncBusboy(request())
+      .then(formData => {
+        var someCollection = formData.fields.someCollection;
+        expect(Array.isArray(someCollection)).toBe(true);
+        expect(someCollection[0]).toEqual({foo: 'foo', bar: 'bar'});
+        done();
+      })
+      .catch(done)
+  });
 
   it('should not overwrite prototypes', (done) => {
     asyncBusboy(request()).then(formData => {
       expect(formData.fields.hasOwnProperty).toEqual(Object.prototype.hasOwnProperty)
       done();
     }).catch(done);
-  })
+  });
 
   it('should throw error when the files limit is reached', (done) => {
     asyncBusboy(request(), {limits: {
@@ -40,8 +60,8 @@ describe('Async-busboy', () => {
         expect(e.code).toBe('Request_files_limit');
         expect(e.message).toBe('Reach files limit');
         done()
-      })
-  })
+      });
+  });
 
   it('should throw error when the fields limit is reached', (done) => {
     asyncBusboy(request(), {limits: {
@@ -54,9 +74,9 @@ describe('Async-busboy', () => {
         expect(e.code).toBe('Request_fields_limit');
         expect(e.message).toBe('Reach fields limit');
         done()
-      })
-  })
-})
+      });
+  });
+});
 
 function makeError(message) {
   return new Error(message);
@@ -104,6 +124,25 @@ function request() {
     'Content-Disposition: form-data; name="array_field[1]"',
     '',
     'value2',
+
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="someCollection[0][foo]"',
+    '',
+    'foo',
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="someCollection[0][bar]"',
+    '',
+    'bar',
+
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="someField[foo]"',
+    '',
+    'foo',
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="someField[bar]"',
+    '',
+    'bar',
+
     '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
     'Content-Disposition: form-data; name="upload_file_0"; filename="1k_a.dat"',
     'Content-Type: application/octet-stream',

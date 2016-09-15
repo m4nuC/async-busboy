@@ -4,7 +4,7 @@
 
 const multiparter = require('../')
 const http = require('http');
-const PORT=8080;
+const PORT = 8080;
 
 function handleRequest(request, response){
   multiparter(request).then(function(formData) {
