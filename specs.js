@@ -10,26 +10,10 @@ describe('Async-busboy', () => {
   it('should gather all fields and streams', (done) => {
     asyncBusboy(request()).then(formData => {
       expect(Object.keys(formData.files).length).toBe(3);
-      expect(Object.keys(formData.fields).length).toBe(6)
+      expect(Object.keys(formData.fields).length).toBe(5)
       done();
     }).catch(done);
   })
-
-  it('should work with array fields', (done) => {
-    asyncBusboy(request()).then(formData => {
-      expect(formData.fields.array_field['1']).toBe('value2')
-      done();
-    }).catch(done);
-  });
-
-  it('should return an array for array_field', (done) => {
-    asyncBusboy(request())
-      .then(formData => {
-        expect(Array.isArray(formData.fields['array_field'])).toBe(true);
-        done();
-      })
-      .catch(done);
-  });
 
   it('should return a valid collection', (done) => {
     asyncBusboy(request())
@@ -116,14 +100,6 @@ function request() {
     'Content-Disposition: form-data; name="hasOwnProperty"',
     '',
     'super bad file',
-    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
-    'Content-Disposition: form-data; name="array_field[0]"',
-    '',
-    'value1',
-    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
-    'Content-Disposition: form-data; name="array_field[1]"',
-    '',
-    'value2',
 
     '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
     'Content-Disposition: form-data; name="someCollection[0][foo]"',
@@ -133,7 +109,14 @@ function request() {
     'Content-Disposition: form-data; name="someCollection[0][bar]"',
     '',
     'bar',
-
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="someCollection[1][0]"',
+    '',
+    'foo',
+    '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
+    'Content-Disposition: form-data; name="someCollection[1][1]"',
+    '',
+    'bar',
     '-----------------------------paZqsnEHRufoShdX6fh0lUhXBP4k',
     'Content-Disposition: form-data; name="someField[foo]"',
     '',

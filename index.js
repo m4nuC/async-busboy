@@ -158,29 +158,29 @@ const objectFromBluePrint = (arr, value) => {
  * @return {Array}
  *
  */
-const mergeArray = (arr1, arr2) => {
-  const base = arr2.length >= arr1.length ? arr2 : arr1;
-  const additive = arr2.length >= arr1.length ? arr1 : arr2;
-  let merged = [];
+// const mergeArray = (arr1, arr2) => {
+//   const base = arr2.length >= arr1.length ? arr2 : arr1;
+//   const additive = arr2.length >= arr1.length ? arr1 : arr2;
+//   let merged = [];
 
-  // We can't use map as it seems to ingore undefined entries in array i.e.: [ , , value]
-  for ( let i = 0 ; i < base.length ; i++) {
-    let value = null;
-    if ( Array.isArray(base[i]) && Array.isArray(additive[i]) ) {
-      value =  mergeArray(base[i], additive[i])
-    } else if ( Array.isArray(base[i]) && ! Array.isArray(additive[i]) ) {
-      value =  mergeArray(base[i], [additive[i]])
-    } else if ( ! Array.isArray(base[i]) && Array.isArray(additive[i]) ) {
-      value =  mergeArray([base[i]], additive[i])
-    } else {
-      value = base[i] || additive[i];
-    }
+//   // We can't use map as it seems to ingore undefined entries in array i.e.: [ , , value]
+//   for ( let i = 0 ; i < base.length ; i++) {
+//     let value = null;
+//     if ( Array.isArray(base[i]) && Array.isArray(additive[i]) ) {
+//       value =  mergeArray(base[i], additive[i])
+//     } else if ( Array.isArray(base[i]) && ! Array.isArray(additive[i]) ) {
+//       value =  mergeArray(base[i], [additive[i]])
+//     } else if ( ! Array.isArray(base[i]) && Array.isArray(additive[i]) ) {
+//       value =  mergeArray([base[i]], additive[i])
+//     } else {
+//       value = base[i] || additive[i];
+//     }
 
-    merged[i]  = value;
-  }
+//     merged[i]  = value;
+//   }
 
-  return merged;
-}
+//   return merged;
+// }
 
 
 /**
@@ -203,14 +203,14 @@ const reconcile = (obj, target) => {
   }
 
   // Dealing with array values
-  if (Array.isArray(val)) {
-    if (Array.isArray(target[key])) {
-      target[key] = mergeArray(val, target[key]);
-    } else {
-      target[key] = val;
-    }
-    return target;
-  }
+  // if (Array.isArray(val)) {
+  //   if (Array.isArray(target[key])) {
+  //     target[key] = mergeArray(val, target[key]);
+  //   } else {
+  //     target[key] = val;
+  //   }
+  //   return target;
+  // }
 
 
 }
