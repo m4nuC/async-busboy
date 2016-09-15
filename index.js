@@ -79,7 +79,7 @@ function onField(fields, name, val, fieldnameTruncated, valTruncated) {
 
   // This looks like a stringified array, let's parse it
   if (name.indexOf('[') > -1) {
-    const obj = objectFromHierarchyArray(extractFormDataInputHierachy(name), val);
+    const obj = objectFromBluePrint(extractFormData(name), val);
     reconcile(obj, fields);
 
   } else {
@@ -112,7 +112,7 @@ function onFile(files, fieldname, file, filename, encoding, mimetype) {
  * @return {Array}
  *
  */
-const extractFormDataInputHierachy = (string) => {
+const extractFormData = (string) => {
   let arr = string.split('[');
   let first = arr.shift();
   let res = arr.map( v => v.split(']')[0] );
@@ -120,49 +120,94 @@ const extractFormDataInputHierachy = (string) => {
   return res
 }
 
+
 /**
  *
  * Generate an object given an hiearchy bluepint and the value
  *
- * i.e. [key1][key2][key3] => { key1: {key2: { key3: value }}};
+ * i.e. [key1, key2, key3] => { key1: {key2: { key3: value }}};
  *
- * @param  {Array} arr:   from extractFormDataInputHierachy
+ * @param  {Array} arr:   from extractFormData
  * @param  {[type]} value: The actual value for this key
  * @return {[type]}       [description]
  *
  */
-const objectFromHierarchyArray = (arr, value) => {
+const objectFromBluePrint = (arr, value) => {
   return arr
     .reverse()
-    .reduce((acc, next) => (
-      Number(next).toString() === 'NaN'
-        ? {[next]: acc}
-        : [acc, Number(next)]),
-      value
-    )
+    .reduce((acc, next) => {
+      if (Number(next).toString() === 'NaN') {
+        return {[next]: acc}
+      } else {
+        let newAcc = [];
+        newAcc[ Number(next) ] = acc;
+        return newAcc;
+      }
+    }, value)
 }
 
-const reconcile = (obj, target) => {
-  var key = Object.keys(obj)[0];
 
-  if (Array.isArray(obj[key])) {
-    let val = obj[key][0], idx = obj[key][1];
-    if (Array.isArray(target[key])) {
-      let k = Object.keys(val)[0];
+/**
+ * Merges two array when one of them may me unconplete
+ *
+ * i.e.:
+ *  arr1 => [ , , value]
+ *  arr2 => [ missingValue1, missingValue2 ]
+ * @param  {Array} arr1
+ * @param  {Array} arr2
+ * @return {Array}
+ *
+ */
+const mergeArray = (arr1, arr2) => {
+  const base = arr2.length >= arr1.length ? arr2 : arr1;
+  const additive = arr2.length >= arr1.length ? arr1 : arr2;
+  let merged = [];
 
-      target[key][idx] == null
-        ? target[key].push(val)
-        : target[key][idx][k] = val[k];
+  // We can't use map as it seems to ingore undefined entries in array i.e.: [ , , value]
+  for ( let i = 0 ; i < base.length ; i++) {
+    let value = null;
+    if ( Array.isArray(base[i]) && Array.isArray(additive[i]) ) {
+      value =  mergeArray(base[i], additive[i])
+    } else if ( Array.isArray(base[i]) && ! Array.isArray(additive[i]) ) {
+      value =  mergeArray(base[i], [additive[i]])
+    } else if ( ! Array.isArray(base[i]) && Array.isArray(additive[i]) ) {
+      value =  mergeArray([base[i]], additive[i])
     } else {
-      target[key] = [val];
+      value = base[i] || additive[i];
     }
 
-    return target;
+    merged[i]  = value;
   }
 
-  if (target.hasOwnProperty(key)) {
-    return reconcile(obj[key], target[key])
+  return merged;
+}
+
+
+/**
+ * Reconciles formated data with initial fields names
+ *
+ * @param  {Object} extractedObject
+ * @param  {Object} the field object initially received
+ * @return {Object} reconciled fields
+ *
+ */
+const reconcile = (obj, target) => {
+  const key = Object.keys(obj)[0];
+  const val = obj[key];
+
+  // Dealing with array values
+  if (Array.isArray(val)) {
+    if (Array.isArray(target[key])) {
+      target[key] = mergeArray(val, target[key]);
+    } else {
+      target[key] = val;
+    }
+    return target;
+
+  // Dealing with objects
+  } else if (target.hasOwnProperty(key)) {
+    return reconcile(val, target[key])
   } else {
-    return target[key] = obj[key];
+    return target[key] = val;
   }
 }

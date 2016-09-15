@@ -64,7 +64,8 @@ i.e:
   'field1': 'value',
   'objectField': {
     'key': 'anotherValue'
-  }
+  },
+  'arrayField': ['a', 'b']
   //...
 };
 ```
@@ -73,12 +74,14 @@ Should be sent as:
 ```
 // -> field1[value]
 // -> objectField[key][anotherKey]
+// -> arrayField[0]['a']
+// -> arrayField[1]['b']
 // .....
 ```
 
-Here is a function that can take care of formating such an object to formData hierarchy
+Here is a function that can take care of this process
 ```js
-const formatObjectForFormData = function (obj, formDataObj, namespace) {
+const serializeFormData = (obj, formDataObj, namespace = null) => {
   var formDataObj = formDataObj || {};
   var formKey;
   for(var property in obj) {
@@ -90,7 +93,7 @@ const formatObjectForFormData = function (obj, formDataObj, namespace) {
       }
 
       if(typeof value === 'object' && !(value instanceof File) && !(value instanceof Date)) {
-          formatObjectForFormData(value, formDataObj, formKey);
+          serializeFormData(value, formDataObj, formKey);
       } else if(value instanceof Date) {
         formDataObj[formKey] = value.toISOString();
       } else {
