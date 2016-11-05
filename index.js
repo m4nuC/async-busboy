@@ -89,7 +89,7 @@ function onField(fields, name, val, fieldnameTruncated, valTruncated) {
 
 function onFile(files, fieldname, file, filename, encoding, mimetype) {
   const tmpName = file.tmpName = new Date().getTime()  + fieldname  + filename;
-  const saveTo = path.join(os.tmpDir(), path.basename(tmpName));
+  const saveTo = path.join(os.tmpdir(), path.basename(tmpName));
   file.on('end', function() {
     const readStream = fs.createReadStream(saveTo);
     readStream.fieldname = fieldname
