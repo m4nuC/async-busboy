@@ -88,6 +88,7 @@ const serializeFormData = (obj, formDataObj, namespace = null) => {
         formKey = property;
       }
 
+      var value = obj[property];
       if(typeof value === 'object' && !(value instanceof File) && !(value instanceof Date)) {
           serializeFormData(value, formDataObj, formKey);
       } else if(value instanceof Date) {
