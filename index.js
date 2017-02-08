@@ -8,15 +8,15 @@ const path = require('path');
 const getDescriptor = Object.getOwnPropertyDescriptor;
 
 module.exports = function (request, options) {
-  options = options || {}
-  options.headers = request.headers
-  const busboy = new Busboy(options)
+  options = options || {};
+  options.headers = request.headers;
+  const busboy = new Busboy(options);
 
   return new Promise((resolve, reject) => {
     const fields = {};
     const files = [];
 
-    request.on('close', cleanup)
+    request.on('close', cleanup);
 
     busboy
       .on('field', onField.bind(null, fields))
@@ -27,27 +27,27 @@ module.exports = function (request, options) {
       .on('finish', onEnd),
 
     busboy.on('partsLimit', function(){
-      const err = new Error('Reach parts limit')
-      err.code = 'Request_parts_limit'
-      err.status = 413
-      onError(err)
-    })
+      const err = new Error('Reach parts limit');
+      err.code = 'Request_parts_limit';
+      err.status = 413;
+      onError(err);
+    });
 
-    busboy.on('filesLimit', function(){
-      const err = new Error('Reach files limit')
-      err.code = 'Request_files_limit'
-      err.status = 413
-      onError(err)
-    })
+    busboy.on('filesLimit', () => {
+      const err = new Error('Reach files limit');
+      err.code = 'Request_files_limit';
+      err.status = 413;
+      onError(err);
+    });
 
-    busboy.on('fieldsLimit', function(){
-      const err = new Error('Reach fields limit')
-      err.code = 'Request_fields_limit'
-      err.status = 413
-      onError(err)
-    })
+    busboy.on('fieldsLimit', () => {
+      const err = new Error('Reach fields limit');
+      err.code = 'Request_fields_limit';
+      err.status = 413;
+      onError(err);
+    });
 
-    request.pipe(busboy)
+    request.pipe(busboy);
 
     function onError(err) {
       cleanup();
@@ -55,27 +55,28 @@ module.exports = function (request, options) {
     }
 
     function onEnd(err) {
+      if(err) reject(err);
       cleanup();
-      return resolve({fields, files})
+      return resolve({fields, files});
     }
 
     function cleanup() {
-      busboy.removeListener('field', onField)
-      busboy.removeListener('file', onFile)
-      busboy.removeListener('close', cleanup)
-      busboy.removeListener('end', cleanup)
-      busboy.removeListener('error', onEnd)
-      busboy.removeListener('partsLimit', onEnd)
-      busboy.removeListener('filesLimit', onEnd)
-      busboy.removeListener('fieldsLimit', onEnd)
-      busboy.removeListener('finish', onEnd)
+      busboy.removeListener('field', onField);
+      busboy.removeListener('file', onFile);
+      busboy.removeListener('close', cleanup);
+      busboy.removeListener('end', cleanup);
+      busboy.removeListener('error', onEnd);
+      busboy.removeListener('partsLimit', onEnd);
+      busboy.removeListener('filesLimit', onEnd);
+      busboy.removeListener('fieldsLimit', onEnd);
+      busboy.removeListener('finish', onEnd);
     }
-  })
-}
+  });
+};
 
 function onField(fields, name, val, fieldnameTruncated, valTruncated) {
   // don't overwrite prototypes
-  if (getDescriptor(Object.prototype, name)) return
+  if (getDescriptor(Object.prototype, name)) return;
 
   // This looks like a stringified array, let's parse it
   if (name.indexOf('[') > -1) {
@@ -90,15 +91,18 @@ function onField(fields, name, val, fieldnameTruncated, valTruncated) {
 function onFile(files, fieldname, file, filename, encoding, mimetype) {
   const tmpName = file.tmpName = new Date().getTime()  + fieldname  + filename;
   const saveTo = path.join(os.tmpdir(), path.basename(tmpName));
-  file.on('end', function() {
+  file.on('end', () => {
     const readStream = fs.createReadStream(saveTo);
-    readStream.fieldname = fieldname
-    readStream.filename = filename
-    readStream.transferEncoding = readStream.encoding = encoding
+    readStream.fieldname = fieldname;
+    readStream.filename = filename;
+    readStream.transferEncoding = readStream.encoding = encoding;
     readStream.mimeType = readStream.mime = mimetype;
     files.push(readStream);
   });
-  file.pipe(fs.createWriteStream(saveTo));
+  const writeStream = fs.createWriteStream(saveTo);
+  writeStream.on('open', () => {
+    file.pipe(fs.createWriteStream(saveTo));
+  });
 }
 
 /**
@@ -113,17 +117,16 @@ function onFile(files, fieldname, file, filename, encoding, mimetype) {
  *
  */
 const extractFormData = (string) => {
-  let arr = string.split('[');
-  let first = arr.shift();
-  let res = arr.map( v => v.split(']')[0] );
+  const arr = string.split('[');
+  const first = arr.shift();
+  const res = arr.map( v => v.split(']')[0] );
   res.unshift(first);
-  return res
-}
-
+  return res;
+};
 
 /**
  *
- * Generate an object given an hiearchy bluepint and the value
+ * Generate an object given an hierarchy blueprint and the value
  *
  * i.e. [key1, key2, key3] => { key1: {key2: { key3: value }}};
  *
@@ -137,15 +140,14 @@ const objectFromBluePrint = (arr, value) => {
     .reverse()
     .reduce((acc, next) => {
       if (Number(next).toString() === 'NaN') {
-        return {[next]: acc}
+        return {[next]: acc};
       } else {
-        let newAcc = [];
+        const newAcc = [];
         newAcc[ Number(next) ] = acc;
         return newAcc;
       }
-    }, value)
-}
-
+    }, value);
+};
 
 /**
  * [Deprecated] because of https://jsbin.com/hulekomopo/1/
@@ -183,12 +185,11 @@ const objectFromBluePrint = (arr, value) => {
 //   return merged;
 // }
 
-
 /**
  * Reconciles formatted data with already formatted data
  *
- * @param  {Object} extractedObject
- * @param  {Object} the field object
+ * @param  {Object} obj extractedObject
+ * @param  {Object} target the field object
  * @return {Object} reconciled fields
  *
  */
@@ -202,7 +203,7 @@ const reconcile = (obj, target) => {
   // Since array are in form of [ , , valu3] [value1, value2]
   // the final array will be: [value1, value2, value3] has expected
   if (target.hasOwnProperty(key)) {
-    return reconcile(val, target[key])
+    return reconcile(val, target[key]);
   } else {
     return target[key] = val;
   }
@@ -217,6 +218,4 @@ const reconcile = (obj, target) => {
   //   }
   //   return target;
   // }
-
-
-}
+};
