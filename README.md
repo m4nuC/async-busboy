@@ -49,7 +49,7 @@ function(someHTTPRequest) {
   });
 }
 ```
-As of today there is no support for directly piping of the request stream into a consumer. The files are first written to disk using `os.tmpDir()`. When the consumer stream drained the request stream, files will be automatically removed, otherwise the host OS should take care of the cleaning process.
+As of today there is no support for directly piping of the request stream into a consumer. The files are first written to disk using `os.tmpdir()`. When the consumer stream drained the request stream, files will be automatically removed, otherwise the host OS should take care of the cleaning process.
 
 ## Working with nested inputs and objects
 Make sure to serialize objects before sending them as formData.
