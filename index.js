@@ -55,9 +55,12 @@ module.exports = function (request, options) {
     }
 
     function onEnd(err) {
-      if(err) reject(err);
       cleanup();
-
+      
+      if(err) {
+        return reject(err);
+      }
+      
       if (filePromises.length > 0) {
         return Promise.all(filePromises)
                         .then(files => resolve({fields, files}))
