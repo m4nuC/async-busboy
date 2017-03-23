@@ -57,6 +57,7 @@ module.exports = function (request, options) {
     function onEnd(err) {
       if(err) reject(err);
       cleanup();
+
       if (filePromises.length > 0) {
         return Promise.all(filePromises)
                         .then(files => resolve({fields, files}))
@@ -95,7 +96,7 @@ function onField(fields, name, val, fieldnameTruncated, valTruncated) {
 }
 
 function onFile(filePromises, fieldname, file, filename, encoding, mimetype) {
-  const tmpName = file.tmpName = new Date().getTime()  + fieldname  + filename;
+  const tmpName = file.tmpName = Date.now() + fieldname  + filename;
   const saveTo = path.join(os.tmpdir(), path.basename(tmpName));
 
   filePromises.push(new Promise((resolve, reject) => {
@@ -107,9 +108,9 @@ function onFile(filePromises, fieldname, file, filename, encoding, mimetype) {
             readStream.transferEncoding = readStream.encoding = encoding;
             readStream.mimeType = readStream.mime = mimetype;
 
-            resolve(readStream)
+            resolve(readStream);
           })
-          .on('error', reject)
+          .on('error', reject);
   }));
 }
 
