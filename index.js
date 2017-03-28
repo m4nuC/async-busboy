@@ -14,13 +14,13 @@ module.exports = function (request, options) {
 
   return new Promise((resolve, reject) => {
     const fields = {};
-    const files = [];
+    const filePromises = [];
 
     request.on('close', cleanup);
 
     busboy
       .on('field', onField.bind(null, fields))
-      .on('file', onFile.bind(null, files))
+      .on('file', onFile.bind(null, filePromises))
       .on('close', cleanup)
       .on('error', onError)
       .on('end', onEnd)
@@ -56,8 +56,12 @@ module.exports = function (request, options) {
 
     function onEnd(err) {
       if(err) reject(err);
-      cleanup();
-      return resolve({fields, files});
+      Promise.all(filePromises)
+        .then((files) => {
+          cleanup();
+          resolve({fields, files});
+        })
+        .catch(reject);
     }
 
     function cleanup() {
@@ -88,21 +92,26 @@ function onField(fields, name, val, fieldnameTruncated, valTruncated) {
   }
 }
 
-function onFile(files, fieldname, file, filename, encoding, mimetype) {
+function onFile(filePromises, fieldname, file, filename, encoding, mimetype) {
   const tmpName = file.tmpName = new Date().getTime()  + fieldname  + filename;
   const saveTo = path.join(os.tmpdir(), path.basename(tmpName));
-  file.on('end', () => {
-    const readStream = fs.createReadStream(saveTo);
-    readStream.fieldname = fieldname;
-    readStream.filename = filename;
-    readStream.transferEncoding = readStream.encoding = encoding;
-    readStream.mimeType = readStream.mime = mimetype;
-    files.push(readStream);
-  });
   const writeStream = fs.createWriteStream(saveTo);
-  writeStream.on('open', () => {
-    file.pipe(fs.createWriteStream(saveTo));
-  });
+  const filePromise = new Promise((resolve, reject) => writeStream
+    .on('open', () => file
+      .pipe(writeStream)
+      .on('error', reject)
+      .on('finish', () => {
+        const readStream = fs.createReadStream(saveTo);
+        readStream.fieldname = fieldname;
+        readStream.filename = filename;
+        readStream.transferEncoding = readStream.encoding = encoding;
+        readStream.mimeType = readStream.mime = mimetype;
+        resolve(readStream);
+      })
+    )
+    .on('error', reject)
+  );
+  filePromises.push(filePromise);
 }
 
 /**
