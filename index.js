@@ -10,6 +10,8 @@ const getDescriptor = Object.getOwnPropertyDescriptor;
 module.exports = function (request, options) {
   options = options || {};
   options.headers = request.headers;
+  const customOnFile = typeof options.onFile === "function" ? options.onFile : false;
+  delete options.onFile;
   const busboy = new Busboy(options);
 
   return new Promise((resolve, reject) => {
@@ -20,7 +22,7 @@ module.exports = function (request, options) {
 
     busboy
       .on('field', onField.bind(null, fields))
-      .on('file', onFile.bind(null, filePromises))
+      .on('file', customOnFile || onFile.bind(null, filePromises))
       .on('close', cleanup)
       .on('error', onError)
       .on('end', onEnd)
@@ -55,13 +57,20 @@ module.exports = function (request, options) {
     }
 
     function onEnd(err) {
-      if(err) reject(err);
-      Promise.all(filePromises)
-        .then((files) => {
+      if(err) {
+          return reject(err);
+      }
+      if (customOnFile) {
           cleanup();
-          resolve({fields, files});
-        })
-        .catch(reject);
+          resolve({ fields });
+      } else {
+          Promise.all(filePromises)
+            .then((files) => {
+              cleanup();
+              resolve({fields, files});
+            })
+            .catch(reject);
+        }
     }
 
     function cleanup() {

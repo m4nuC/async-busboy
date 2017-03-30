@@ -26,8 +26,28 @@ describe('Async-busboy', () => {
       expect(Object.keys(formData.fields).length).toBe(5);
 
       // Check file contents
-      const fileContentPromise = formData.files.map(readFileStreamPromise);
-      Promise.all(fileContentPromise)
+      const fileContentPromises = formData.files.map(readFileStreamPromise);
+      Promise.all(fileContentPromises)
+        .then((contentBufs) => {
+          contentBufs.forEach((content, index) =>
+            expect(content.toString()).toBe(fileContent[index])
+          );
+          done();
+        })
+        .catch(done);
+    }).catch(done);
+  });
+
+  it('should gather all fields and streams using custom file handler', (done) => {
+    const fileContentPromises = [];
+    const onFileHandler = (fieldname, file, filename, encoding, mimetype) => {
+        fileContentPromises.push(readFileStreamPromise(file));
+    };
+    asyncBusboy(request(), { onFile: onFileHandler }).then(formData => {
+      expect(Object.keys(formData.fields).length).toBe(5);
+
+      // Check file contents
+      Promise.all(fileContentPromises)
         .then((contentBufs) => {
           contentBufs.forEach((content, index) =>
             expect(content.toString()).toBe(fileContent[index])
