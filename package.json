@@ -20,7 +20,8 @@
   "author": "Emanuel Chappat <emmanuel.chappat@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "busboy": "^0.2.12"
+    "busboy": "^0.2.12",
+    "uuid": "^3.0.1"
   },
   "devDependencies": {
     "expect": "^1.13.4",
