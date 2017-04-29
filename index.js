@@ -83,39 +83,68 @@ function onField(fields, name, val, fieldnameTruncated, valTruncated) {
   if (getDescriptor(Object.prototype, name)) return;
 
   // This looks like a stringified array, let's parse it
-  if (name.indexOf('[') > -1) {
-    const obj = objectFromBluePrint(extractFormData(name), val);
-    reconcile(obj, fields);
-
-  } else {
+  if (name.indexOf('[') > -1)
+    HandleStringifiedField(fields, name, val);
+  else
     fields[name] = val;
-  }
 }
 
-function onFile(filePromises, fieldname, file, filename, encoding, mimetype) {
+function onFile(files, fieldname, file, filename, encoding, mimetype) {
   const tmpName = file.tmpName = new Date().getTime()  + fieldname  + filename;
   const saveTo = path.join(os.tmpdir(), path.basename(tmpName));
+  file.on('end', () => {
+    const readStream = fs.createReadStream(saveTo);
+    readStream.fieldname = fieldname;
+    readStream.filename = filename;
+    readStream.transferEncoding = readStream.encoding = encoding;
+    readStream.mimeType = readStream.mime = mimetype;
+    files.push(readStream);
+  });
   const writeStream = fs.createWriteStream(saveTo);
-  const filePromise = new Promise((resolve, reject) => writeStream
-    .on('open', () => file
-      .pipe(writeStream)
-      .on('error', reject)
-      .on('finish', () => {
-        const readStream = fs.createReadStream(saveTo);
-        readStream.fieldname = fieldname;
-        readStream.filename = filename;
-        readStream.transferEncoding = readStream.encoding = encoding;
-        readStream.mimeType = readStream.mime = mimetype;
-        resolve(readStream);
-      })
-    )
-    .on('error', reject)
-  );
-  filePromises.push(filePromise);
+  writeStream.on('open', () => {
+    file.pipe(fs.createWriteStream(saveTo));
+  });
 }
 
 /**
- *
+ * 
+ * Adds the value to the correct name
+ * 
+ * 
+ * @param {Object} object: Object representing fields up to this point.
+ * @param {String} string: Name of the new field (including the braces).
+ * @param {String} value: Value of the field.
+ * @return {Object} object: An updated fields object.
+ */
+const HandleStringifiedField = (Fields, Name, Value) => {
+   Name = Name.split("["); // More efficient than splitting twice on a "["
+
+   let FieldName = Name.shift(); // Gets the field name, ex: password[confirmation] becomes "password".
+   let Key = Name.pop().split("]").shift(); // Gets the key name, ex: password[confirmation] becomes "confirmation".
+   let IndexBased; // This will be used in the next few lines, but we want to make it so we can set it.
+
+   if (Fields[FieldName] === undefined) {
+      IndexBased = Key === ""; // We use this to make either an empty array or object, depending on the type.
+
+      if (IndexBased)
+         Fields[FieldName] = [];
+      else
+         Fields[FieldName] = {};
+   } else {
+      IndexBased = Array.isArray(Fields[FieldName]); // We also use IndexBased to determine how to add the value.
+   }
+
+   if (IndexBased) {
+      Fields[FieldName].push(Value);
+   } else {
+      Fields[FieldName][Key] = Value;
+   }
+
+   return Fields;
+};
+
+/**
+ * [Deprecated] because of https://github.com/m4nuC/async-busboy/issues/21
  * Extract a hierarchy array from a stringified formData single input.
  *
  *
@@ -125,16 +154,16 @@ function onFile(filePromises, fieldname, file, filename, encoding, mimetype) {
  * @return {Array}
  *
  */
-const extractFormData = (string) => {
-  const arr = string.split('[');
-  const first = arr.shift();
-  const res = arr.map( v => v.split(']')[0] );
-  res.unshift(first);
-  return res;
-};
+//const extractFormData = (string) => {
+//	const arr = string.split('[');
+//	const first = arr.shift();
+//	const res = arr.map( v => v.split(']')[0] );
+//	res.unshift(first);
+//	return res;
+//};
 
 /**
- *
+ * [Deprecated] because of https://github.com/m4nuC/async-busboy/issues/21
  * Generate an object given an hierarchy blueprint and the value
  *
  * i.e. [key1, key2, key3] => { key1: {key2: { key3: value }}};
@@ -144,19 +173,19 @@ const extractFormData = (string) => {
  * @return {[type]}       [description]
  *
  */
-const objectFromBluePrint = (arr, value) => {
-  return arr
-    .reverse()
-    .reduce((acc, next) => {
-      if (Number(next).toString() === 'NaN') {
-        return {[next]: acc};
-      } else {
-        const newAcc = [];
-        newAcc[ Number(next) ] = acc;
-        return newAcc;
-      }
-    }, value);
-};
+//const objectFromBluePrint = (arr, value) => {
+//  return arr
+//    .reverse()
+//    .reduce((acc, next) => {
+//      if (Number(next).toString() === 'NaN') {
+//        return {[next]: acc};
+//      } else {
+//        const newAcc = [];
+//        newAcc[ Number(next) ] = acc;
+//        return newAcc;
+//      }
+//    }, value);
+//};
 
 /**
  * [Deprecated] because of https://jsbin.com/hulekomopo/1/
@@ -195,6 +224,7 @@ const objectFromBluePrint = (arr, value) => {
 // }
 
 /**
+ * [Deprecated] because of https://github.com/m4nuC/async-busboy/issues/21
  * Reconciles formatted data with already formatted data
  *
  * @param  {Object} obj extractedObject
@@ -202,29 +232,28 @@ const objectFromBluePrint = (arr, value) => {
  * @return {Object} reconciled fields
  *
  */
-const reconcile = (obj, target) => {
-  const key = Object.keys(obj)[0];
-  const val = obj[key];
+// const reconcile = (obj, target) => {
+//  const key = Object.keys(obj)[0];
+//  const val = obj[key];
 
-  // The reconciliation works even with array has
-  // Object.keys will yield the array indexes
-  // see https://jsbin.com/hulekomopo/1/
-  // Since array are in form of [ , , valu3] [value1, value2]
-  // the final array will be: [value1, value2, value3] has expected
-  if (target.hasOwnProperty(key)) {
-    return reconcile(val, target[key]);
-  } else {
-    return target[key] = val;
-  }
+//  // The reconciliation works even with array has
+//  // Object.keys will yield the array indexes
+//  // see https://jsbin.com/hulekomopo/1/
+//  // Since array are in form of [ , , valu3] [value1, value2]
+//  // the final array will be: [value1, value2, value3] has expected
+//  if (target.hasOwnProperty(key)) {
+//    return reconcile(val, target[key]);
+//  } else {
+//    return target[key] = val;
+//  }
 
-  // [Deprecated] because of https://jsbin.com/hulekomopo/1/
-  // Dealing with array values
-  // if (Array.isArray(val)) {
-  //   if (Array.isArray(target[key])) {
-  //     target[key] = mergeArray(val, target[key]);
-  //   } else {
-  //     target[key] = val;
-  //   }
-  //   return target;
-  // }
-};
+//  // [Deprecated] because of https://jsbin.com/hulekomopo/1/
+//  // Dealing with array values
+//  // if (Array.isArray(val)) {
+//  //   if (Array.isArray(target[key])) {
+//  //     target[key] = mergeArray(val, target[key]);
+//  //   } else {
+//  //     target[key] = val;
+//  //   }
+//  //   return target;
+//  //
