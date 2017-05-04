@@ -103,7 +103,8 @@ function onField(fields, name, val, fieldnameTruncated, valTruncated) {
 }
 
 function onFile(filePromises, fieldname, file, filename, encoding, mimetype) {
-  const tmpName = file.tmpName = Date.now() + fieldname + filename;
+  const tmpName = file.tmpName = Math.random().toString(16).substring(2) + '-' + filename;
+
   const saveTo = path.join(os.tmpdir(), path.basename(tmpName));
   const writeStream = fs.createWriteStream(saveTo);
   const filePromise = new Promise((resolve, reject) => writeStream
