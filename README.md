@@ -21,7 +21,7 @@ Designed for use with [Koa2](https://github.com/koajs/koa/tree/v2.x) and [Async/
 
 ## Examples
 
-### Async/Await
+### Async/Await (using temp files)
 ```js
 import asyncBusboy from 'async-busboy';
 
@@ -37,8 +37,26 @@ async function(ctx, next) {
   }
 }
 ```
+### Async/Await (using custom onFile handler, i.e. no temp files)
+```js
+import asyncBusboy from 'async-busboy';
 
-### ES5 with promise
+// Koa 2 middleware
+async function(ctx, next) {
+  const {fields} = await asyncBusboy(ctx.req, {
+    onFile: function(fieldname, file, filename, encoding, mimetype) {
+        uploadFilesToS3(file);
+    }
+  });
+
+  // Do validation, but file is already uploaded...
+  if ( !checkFiles(fields) ) {
+    return 'error';
+  }
+}
+```
+
+### ES5 with promise (using temp files)
 ```js
 var asyncBusboy = require('async-busboy');
 
@@ -49,7 +67,17 @@ function(someHTTPRequest) {
   });
 }
 ```
-As of today there is no support for directly piping of the request stream into a consumer. The files are first written to disk using `os.tmpdir()`. When the consumer stream drained the request stream, files will be automatically removed, otherwise the host OS should take care of the cleaning process.
+
+## Async API using temp files
+The request streams are first written to temporary files using `os.tmpdir()`. File read streams associated with the temporary files are returned from the call to async-busboy. When the consumer has drained the file read streams, the files will be automatically removed, otherwise the host OS should take care of the cleaning process.
+
+## Async API using custom onFile handler
+If a custom onFile handler is specified in the options to async-busboy it
+will only resolve an object containing fields, but instead no temporary files
+needs to be created since the file stream is directly passed to the application.
+Note that all file streams need to be consumed for async-busboy to resolve due
+to the implementation of busboy. If you don't care about a received
+file stream, simply call `stream.resume()` to discard the content.
 
 ## Working with nested inputs and objects
 Make sure to serialize objects before sending them as formData.
@@ -106,7 +134,7 @@ const serializeFormData = (obj, formDataObj, namespace = null) => {
 
 
 ### Try it on your local
-If you want to run some test localy, clone this repo, then run: `node examples/index.js`
+If you want to run some test locally, clone this repo, then run: `node examples/index.js`
 From there you can use something like [Postman](https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?hl=en) to send `POST` request to `localhost:8080`.
 Note: When using Postman make sure to not send a `Content-Type` header, if it's filed by default, just delete it. (This is to let the `boudary` header be generated automaticaly)
 
