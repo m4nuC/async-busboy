@@ -114,10 +114,7 @@ function onFile(filePromises, fieldname, file, filename, encoding, mimetype) {
   const saveTo = path.join(os.tmpdir(), path.basename(tmpName));
   const writeStream = fs.createWriteStream(saveTo);
 
-  if(onFileLimitReached)
-
-  const filePromise =
-    new Promise((resolve, reject) => writeStream
+  const filePromise = new Promise((resolve, reject) => writeStream
       .on('open', () => file
         .pipe(writeStream)
         .on('error', reject)
