@@ -177,42 +177,6 @@ const objectFromBluePrint = (arr, value) => {
 };
 
 /**
- * [Deprecated] because of https://jsbin.com/hulekomopo/1/
- * Merges two array when one of them may me unconplete
- *
- * i.e.:
- *  arr1 => [ , , value]
- *  arr2 => [ missingValue1, missingValue2 ]
- * @param  {Array} arr1
- * @param  {Array} arr2
- * @return {Array}
- *
- */
-// const mergeArray = (arr1, arr2) => {
-//   const base = arr2.length >= arr1.length ? arr2 : arr1;
-//   const additive = arr2.length >= arr1.length ? arr1 : arr2;
-//   let merged = [];
-
-//   // We can't use map as it seems to ingore undefined entries in array i.e.: [ , , value]
-//   for ( let i = 0 ; i < base.length ; i++) {
-//     let value = null;
-//     if ( Array.isArray(base[i]) && Array.isArray(additive[i]) ) {
-//       value =  mergeArray(base[i], additive[i])
-//     } else if ( Array.isArray(base[i]) && ! Array.isArray(additive[i]) ) {
-//       value =  mergeArray(base[i], [additive[i]])
-//     } else if ( ! Array.isArray(base[i]) && Array.isArray(additive[i]) ) {
-//       value =  mergeArray([base[i]], additive[i])
-//     } else {
-//       value = base[i] || additive[i];
-//     }
-
-//     merged[i]  = value;
-//   }
-
-//   return merged;
-// }
-
-/**
  * Reconciles formatted data with already formatted data
  *
  * @param  {Object} obj extractedObject
@@ -235,14 +199,4 @@ const reconcile = (obj, target) => {
     return target[key] = val;
   }
 
-  // [Deprecated] because of https://jsbin.com/hulekomopo/1/
-  // Dealing with array values
-  // if (Array.isArray(val)) {
-  //   if (Array.isArray(target[key])) {
-  //     target[key] = mergeArray(val, target[key]);
-  //   } else {
-  //     target[key] = val;
-  //   }
-  //   return target;
-  // }
 };
