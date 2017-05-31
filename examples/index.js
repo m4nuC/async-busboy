@@ -2,12 +2,12 @@
 //From there you can use something like [Postman](https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?hl=en) to send `POST` request to `localhost:8080`.
 //Note: When using Postman make sure to not send a `Content-Type` header, if it's field by default, juste delete it.
 
-const multiparter = require('../')
+const asyncBusboy = require('../')
 const http = require('http');
 const PORT = 8080;
 
 function handleRequest(request, response){
-  multiparter(request).then(function(formData) {
+  asyncBusboy(request).then(function(formData) {
     // [You can put your tests here]
     console.log('Files :', formData.files);
     console.log('Fields :', formData.fields)
