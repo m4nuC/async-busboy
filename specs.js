@@ -69,6 +69,20 @@ describe('Async-busboy', () => {
       .catch(done)
   });
 
+  it('should return a valid array', (done) => {
+    asyncBusboy(request())
+      .then(formData => {
+        var fileName0 = formData.fields.file_name_0;
+        expect(Array.isArray(fileName0)).toBe(true);
+        expect(fileName0.length).toBe(3);
+        expect(fileName0[0]).toEqual('super alpha file');
+        expect(fileName0[1]).toEqual('super beta file');
+        expect(fileName0[2]).toEqual('super gamma file');
+        done();
+      })
+      .catch(done)
+  });
+
   it('should not overwrite prototypes', (done) => {
     asyncBusboy(request()).then(formData => {
       expect(formData.fields.hasOwnProperty).toEqual(Object.prototype.hasOwnProperty)

@@ -97,12 +97,21 @@ function onField(fields, name, val, fieldnameTruncated, valTruncated) {
     reconcile(obj, fields);
 
   } else {
-    fields[name] = val;
+    if (fields.hasOwnProperty(name)) {
+      if (Array.isArray(fields[name])) {
+        fields[name].push(val);
+      } else {
+        fields[name] = [fields[name], val];
+      }
+    } else {
+      fields[name] = val;
+    }
   }
 }
 
 function onFile(filePromises, fieldname, file, filename, encoding, mimetype) {
-  const tmpName = file.tmpName = new Date().getTime()  + fieldname  + filename;
+  const tmpName = file.tmpName = Math.random().toString(16).substring(2) + '-' + filename;
+
   const saveTo = path.join(os.tmpdir(), path.basename(tmpName));
   const writeStream = fs.createWriteStream(saveTo);
   const filePromise = new Promise((resolve, reject) => writeStream
