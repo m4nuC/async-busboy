@@ -22,7 +22,7 @@ module.exports = function (request, options) {
 
     busboy
       .on('field', onField.bind(null, fields))
-      .on('file', customOnFile || onFile.bind(null, filePromises))
+      .on('file', customOnFile || onFile.bind(busboy, filePromises))
       .on('close', cleanup)
       .on('error', onError)
       .on('end', onEnd)
@@ -47,6 +47,13 @@ module.exports = function (request, options) {
       err.code = 'Request_fields_limit';
       err.status = 413;
       onError(err);
+    });
+
+    busboy.on('fileSizeLimit', () => {
+        const err = new Error('Reach file size limit');
+        err.code = 'Request_file_size_limit';
+        err.status = 413;
+        onError(err);
     });
 
     request.pipe(busboy);
@@ -112,6 +119,9 @@ function onField(fields, name, val, fieldnameTruncated, valTruncated) {
 function onFile(filePromises, fieldname, file, filename, encoding, mimetype) {
   const tmpName = file.tmpName = Math.random().toString(16).substring(2) + '-' + filename;
   const saveTo = path.join(os.tmpdir(), path.basename(tmpName));
+  file.on('limit',() =>{
+      this.emit('fileSizeLimit');
+  });
   const writeStream = fs.createWriteStream(saveTo);
 
   const filePromise = new Promise((resolve, reject) => writeStream
