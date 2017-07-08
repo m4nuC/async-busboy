@@ -1,11 +1,11 @@
 {
-  "name": "async-busboy-fork",
+  "name": "async-busboy",
   "version": "0.6.1",
   "description": "Promise based multipart form parser",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yrong/async-busboy"
+    "url": "https://github.com/m4nuC/async-busboy"
   },
   "scripts": {
     "test": "NODE_ENV=test mocha specs.js --harmony --reporter spec --bail",
