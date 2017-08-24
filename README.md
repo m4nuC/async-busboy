@@ -44,7 +44,7 @@ import asyncBusboy from 'async-busboy';
 // Koa 2 middleware
 async function(ctx, next) {
   const {fields} = await asyncBusboy(ctx.req, {
-    onFile: function(fieldname, file, filename, encoding, mimetype) {
+    onFile: function(filePromises, fieldname, file, filename, encoding, mimetype) {
         uploadFilesToS3(file);
     }
   });
