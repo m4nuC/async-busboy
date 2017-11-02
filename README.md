@@ -43,13 +43,13 @@ import asyncBusboy from 'async-busboy';
 
 // Koa 2 middleware
 async function(ctx, next) {
-  const {fields} = await asyncBusboy(ctx.req, {
-    onFile: function(filePromises, fieldname, file, filename, encoding, mimetype) {
-        uploadFilesToS3(file);
+  const { fields } = await asyncBusboy(ctx.req, {
+    onFile: function(fieldname, file, filename, encoding, mimetype) {
+      uploadFilesToS3(file);
     }
   });
 
-  // Do validation, but file is already uploaded...
+  // Do validation, but files are already uploading...
   if ( !checkFiles(fields) ) {
     return 'error';
   }
