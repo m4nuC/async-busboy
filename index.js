@@ -26,7 +26,7 @@ module.exports = function (request, options) {
       .on('close', cleanup)
       .on('error', onError)
       .on('end', onEnd)
-      .on('finish', onEnd),
+      .on('finish', onEnd);
 
     busboy.on('partsLimit', function(){
       const err = new Error('Reach parts limit');
@@ -115,20 +115,25 @@ function onFile(filePromises, fieldname, file, filename, encoding, mimetype) {
   const writeStream = fs.createWriteStream(saveTo);
 
   const filePromise = new Promise((resolve, reject) => writeStream
-      .on('open', () => file
-        .pipe(writeStream)
-        .on('error', reject)
-        .on('finish', () => {
-          const readStream = fs.createReadStream(saveTo);
-          readStream.fieldname = fieldname;
-          readStream.filename = filename;
-          readStream.transferEncoding = readStream.encoding = encoding;
-          readStream.mimeType = readStream.mime = mimetype;
-          resolve(readStream);
-        })
-      )
-    .on('error', reject)
-    );
+    .on('open', () => file
+      .pipe(writeStream)
+      .on('error', reject)
+      .on('finish', () => {
+        const readStream = fs.createReadStream(saveTo);
+        readStream.fieldname = fieldname;
+        readStream.filename = filename;
+        readStream.transferEncoding = readStream.encoding = encoding;
+        readStream.mimeType = readStream.mime = mimetype;
+        resolve(readStream);
+      })
+    )
+    .on('error', (err) => {
+      file
+        .resume()
+        .on('error', reject);
+      reject(err);
+    })
+  );
   filePromises.push(filePromise);
 }
 
