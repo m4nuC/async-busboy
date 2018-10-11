@@ -9,7 +9,7 @@ const getDescriptor = Object.getOwnPropertyDescriptor;
 
 module.exports = function (request, options) {
   options = options || {};
-  options.headers = request.headers;
+  options.headers = options.headers || request.headers;
   const customOnFile = typeof options.onFile === "function" ? options.onFile : false;
   delete options.onFile;
   const busboy = new Busboy(options);
