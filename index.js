@@ -23,7 +23,6 @@ module.exports = function (request, options) {
     busboy
       .on('field', onField.bind(null, fields))
       .on('file', customOnFile || onFile.bind(null, filePromises))
-      .on('close', cleanup)
       .on('error', onError)
       .on('end', onEnd)
       .on('finish', onEnd);
