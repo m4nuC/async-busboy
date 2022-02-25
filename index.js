@@ -1,6 +1,6 @@
 'use strict';
 
-const Busboy = require('busboy');
+const busboy = require('busboy');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -13,7 +13,7 @@ module.exports = function (request, options) {
   const customOnFile =
     typeof options.onFile === 'function' ? options.onFile : false;
   delete options.onFile;
-  const busboy = new Busboy(options);
+  const bb = busboy(options);
 
   return new Promise((resolve, reject) => {
     const fields = {};
@@ -21,35 +21,34 @@ module.exports = function (request, options) {
 
     request.on('close', cleanup);
 
-    busboy
-      .on('field', onField.bind(null, fields))
+    bb.on('field', onField.bind(null, fields))
       .on('file', customOnFile || onFile.bind(null, filePromises))
       .on('error', onError)
       .on('end', onEnd)
-      .on('finish', onEnd);
+      .on('close', onEnd);
 
-    busboy.on('partsLimit', function(){
+    bb.on('partsLimit', function () {
       const err = new Error('Reach parts limit');
       err.code = 'Request_parts_limit';
       err.status = 413;
       onError(err);
     });
 
-    busboy.on('filesLimit', () => {
+    bb.on('filesLimit', () => {
       const err = new Error('Reach files limit');
       err.code = 'Request_files_limit';
       err.status = 413;
       onError(err);
     });
 
-    busboy.on('fieldsLimit', () => {
+    bb.on('fieldsLimit', () => {
       const err = new Error('Reach fields limit');
       err.code = 'Request_fields_limit';
       err.status = 413;
       onError(err);
     });
 
-    request.pipe(busboy);
+    request.pipe(bb);
 
     function onError(err) {
       cleanup();
@@ -74,64 +73,78 @@ module.exports = function (request, options) {
     }
 
     function cleanup() {
-      busboy.removeListener('field', onField);
-      busboy.removeListener('file', customOnFile || onFile);
-      busboy.removeListener('close', cleanup);
-      busboy.removeListener('end', cleanup);
-      busboy.removeListener('error', onEnd);
-      busboy.removeListener('partsLimit', onEnd);
-      busboy.removeListener('filesLimit', onEnd);
-      busboy.removeListener('fieldsLimit', onEnd);
-      busboy.removeListener('finish', onEnd);
+      bb.removeListener('field', onField);
+      bb.removeListener('file', customOnFile || onFile);
+      bb.removeListener('close', cleanup);
+      bb.removeListener('end', cleanup);
+      bb.removeListener('error', onEnd);
+      bb.removeListener('partsLimit', onEnd);
+      bb.removeListener('filesLimit', onEnd);
+      bb.removeListener('fieldsLimit', onEnd);
+      bb.removeListener('finish', onEnd);
     }
   });
 };
 
-function onField(fields, name, val, fieldnameTruncated, valTruncated) {
+/**
+ *
+ * @param {Object} fields
+ * @param {string} name
+ * @param {string} value
+ * @param {{ nameTruncated: boolean, valueTruncated: boolean, encoding: string, mimeType: string }} info
+ */
+function onField(fields, name, value, info) {
   // don't overwrite prototypes
   if (getDescriptor(Object.prototype, name)) return;
 
   // This looks like a stringified array, let's parse it
   if (name.indexOf('[') > -1) {
-    const obj = objectFromBluePrint(extractFormData(name), val);
+    const obj = objectFromBluePrint(extractFormData(name), value);
     reconcile(obj, fields);
   } else {
     if (fields.hasOwnProperty(name)) {
       if (Array.isArray(fields[name])) {
-        fields[name].push(val);
+        fields[name].push(value);
       } else {
-        fields[name] = [fields[name], val];
+        fields[name] = [fields[name], value];
       }
     } else {
-      fields[name] = val;
+      fields[name] = value;
     }
   }
 }
 
-function onFile(filePromises, fieldname, file, filename, encoding, mimetype) {
-  const tmpName = file.tmpName = Math.random().toString(16).substring(2) + '-' + filename;
+/**
+ *
+ * @param {Array} filePromises
+ * @param {string} file
+ * @param {Readable} stream
+ * @param {{ filename: string, encoding: string, mimeType: string }} info
+ */
+function onFile(filePromises, file, stream, info) {
+  const tmpName = Math.random().toString(16).substring(2) + '-' + info.filename;
   const saveTo = path.join(os.tmpdir(), path.basename(tmpName));
   const writeStream = fs.createWriteStream(saveTo);
 
-  const filePromise = new Promise((resolve, reject) => writeStream
-    .on('open', () => file
-      .pipe(writeStream)
-      .on('error', reject)
-      .on('finish', () => {
-        const readStream = fs.createReadStream(saveTo);
-        readStream.fieldname = fieldname;
-        readStream.filename = filename;
-        readStream.transferEncoding = readStream.encoding = encoding;
-        readStream.mimeType = readStream.mime = mimetype;
-        resolve(readStream);
+  const filePromise = new Promise((resolve, reject) =>
+    writeStream
+      .on('open', () =>
+        stream
+          .pipe(writeStream)
+          .on('error', reject)
+          .on('finish', () => {
+            const readStream = fs.createReadStream(saveTo);
+            readStream.fieldname = file;
+            readStream.filename = info.filename;
+            readStream.transferEncoding = readStream.encoding = info.encoding;
+            readStream.mimeType = readStream.mime = info.mimeType;
+            resolve(readStream);
+          })
+      )
+      .on('error', (err) => {
+        stream.resume().on('error', reject);
+        reject(err);
       })
-    )
-    .on('error', (err) => {
-      file
-        .resume()
-        .on('error', reject);
-      reject(err);
-    })
   );
   filePromises.push(filePromise);
 }

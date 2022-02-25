@@ -22,10 +22,10 @@
   "author": "Emanuel Chappat <emmanuel.chappat@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "busboy": "^0.3.1"
+    "busboy": "^1.4.0"
   },
   "devDependencies": {
-    "expect": "^1.13.4",
+    "expect": "^27.5.1",
     "formstream": "*",
     "istanbul": "*",
     "mocha": "*",
