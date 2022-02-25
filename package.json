@@ -9,7 +9,9 @@
   },
   "scripts": {
     "test": "NODE_ENV=test mocha specs.js --harmony --reporter spec --bail",
-    "cover": "NODE_ENV=test istanbul cover -x specs.js _mocha specs.js -- --reporter spec --bail"
+    "cover": "NODE_ENV=test istanbul cover -x specs.js _mocha specs.js -- --reporter spec --bail",
+    "lint": "prettier --check .",
+    "lint-fix": "prettier --write ."
   },
   "keywords": [
     "koa",
@@ -26,6 +28,12 @@
     "expect": "^1.13.4",
     "formstream": "*",
     "istanbul": "*",
-    "mocha": "*"
+    "mocha": "*",
+    "prettier": "^2.5.1"
+  },
+  "prettier": {
+    "tabWidth": 2,
+    "semi": true,
+    "singleQuote": true
   }
 }
