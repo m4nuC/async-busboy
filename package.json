@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/m4nuC/async-busboy"
+    "url": "https://github.com/amagitechnologies/async-busboy"
   },
   "scripts": {
     "test": "NODE_ENV=test mocha specs.js --harmony --reporter spec --bail",
@@ -17,7 +17,7 @@
     "form",
     "file-upload"
   ],
-  "author": "Emanuel Chappat <emmanuel.chappat@gmail.com>",
+  "author": "AMAGI <contact@amagi.io>",
   "license": "MIT",
   "dependencies": {
     "busboy": "^0.3.1"
