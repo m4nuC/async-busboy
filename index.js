@@ -18,7 +18,12 @@ module.exports = function (request, options) {
     const fields = {};
     const filePromises = [];
 
-    request.on('close', cleanup);
+    /* 
+    had to manually call socket "close" event due to request "close" event being updated in node v16 
+    to trigger "close" event specific to the request stream (https://github.com/nodejs/node/issues/38924).
+    This will wait for the socket to close instead
+    */
+    request.socket.on('close', cleanup)
 
     busboy
       .on('field', onField.bind(null, fields))
