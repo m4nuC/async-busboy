@@ -15,6 +15,8 @@
 [download-image]: https://img.shields.io/npm/dm/async-busboy.svg?style=flat-square
 [download-url]: https://npmjs.org/package/async-busboy
 
+Originally by @m4nuC, and forked/updated by @amagitechnologies
+
 The typical use case for this library is when handling forms that contain file upload field(s) mixed with other inputs.
 Parsing logic relies on [busboy](http://github.com/mscdex/busboy).
 Designed for use with [Koa2](https://github.com/koajs/koa/tree/v2.x) and [Async/Await](https://github.com/tc39/ecmascript-asyncawait).
