@@ -9,7 +9,9 @@
   },
   "scripts": {
     "test": "NODE_ENV=test mocha specs.js --harmony --reporter spec --bail",
-    "cover": "NODE_ENV=test istanbul cover -x specs.js _mocha specs.js -- --reporter spec --bail"
+    "cover": "NODE_ENV=test istanbul cover -x specs.js _mocha specs.js -- --reporter spec --bail",
+    "lint": "prettier --check .",
+    "lint-fix": "prettier --write ."
   },
   "keywords": [
     "koa",
@@ -20,12 +22,18 @@
   "author": "Emanuel Chappat <emmanuel.chappat@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "busboy": "^0.3.1"
+    "busboy": "^1.6.0"
   },
   "devDependencies": {
-    "expect": "^1.13.4",
+    "expect": "^27.5.1",
     "formstream": "*",
     "istanbul": "*",
-    "mocha": "*"
+    "mocha": "*",
+    "prettier": "^3.0.3"
+  },
+  "prettier": {
+    "tabWidth": 2,
+    "semi": true,
+    "singleQuote": true
   }
 }
